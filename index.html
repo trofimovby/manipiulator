@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ru" class="no-cursor">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Услуги манипулятора в Минске. Манипулятор724.бел - грузоперевозки по всей Беларуси. Аренда от 80 BYN.">
+    <title>Манипулятор724.бел | Аренда манипулятора Минск</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=Unbounded:wght@200;400;700;900&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+
+    <style>
+        :root {
+            --font-head: 'Unbounded', sans-serif;
+            --font-body: 'Space Grotesk', sans-serif;
+
+            /* ЕДИНСТВЕННЫЙ АКЦЕНТ - ЖЕЛТЫЙ */
+            --accent: #FFC107;
+            --accent-dim: rgba(255, 193, 7, 0.2); /* Тусклый желтый для фона */
+
+            --bg-dark: #0a0a0a;
+            --bg-darker: #000000;
+            --text-on-yellow: #000000;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg-dark);
+            color: #ffffff;
+            font-family: var(--font-body);
+            overflow-x: hidden;
+        }
+
+        /* --- SCROLLBAR --- */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-darker); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+        /* --- UTILS --- */
+        .font-head { font-family: var(--font-head); }
+        .wrapper { max-width: 1400px; margin: 0 auto; padding: 0 5vw; }
+        .section-pad { padding: 100px 0; }
+
+        .text-accent { color: var(--accent); }
+
+        /* --- CURSOR (ТЕПЕРЬ ЖЕЛТЫЙ) --- */
+        html.no-cursor { cursor: none; }
+        .cursor-dot {
+            width: 12px; height: 12px; background: var(--accent); border-radius: 50%;
+            position: fixed; top: 0; left: 0; pointer-events: none; z-index: 20000;
+            transform: translate3d(-50%, -50%, 0); will-change: transform; mix-blend-mode: normal;
+        }
+        .cursor-outline {
+            width: 40px; height: 40px; border: 2px solid rgba(255, 193, 7, 0.5); border-radius: 50%;
+            position: fixed; top: 0; left: 0; pointer-events: none; z-index: 19999;
+            transform: translate3d(-50%, -50%, 0); will-change: transform; transition: width 0.2s, height 0.2s;
+        }
+        .hovered .cursor-outline { width: 80px; height: 80px; background: rgba(255, 193, 7, 0.1); border-color: var(--accent); }
+        button, a { cursor: pointer !important; }
+
+        /* --- HERO --- */
+        #hero {
+            min-height: 100vh;
+            display: flex; align-items: center; justify-content: center; position: relative;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.9)), url('1.webp');
+            background-size: cover; background-position: center; overflow: hidden;
+        }
+
+        /* Золотое свечение */
+        #hero::before {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(circle at 30% 50%, rgba(255, 193, 7, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 60%, rgba(255, 193, 7, 0.1) 0%, transparent 40%);
+            mix-blend-mode: screen; animation: glow 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow { 0% { opacity: 0.6; } 100% { opacity: 1; } }
+
+        .hero-title {
+            font-size: clamp(2rem, 8vw, 6rem);
+            font-family: var(--font-head); font-weight: 900; text-transform: uppercase;
+            line-height: 1.1; letter-spacing: -0.02em; color: #ffffff;
+            text-shadow: 2px 2px 20px rgba(0,0,0,0.8);
+        }
+
+        /* --- STICKY HEADER --- */
+        .sticky-header {
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;
+            padding: 1rem 5vw; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(10, 10, 10, 0.9); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 193, 7, 0.2);
+            transform: translateY(-100%); transition: transform 0.3s ease;
+        }
+        .sticky-header.visible { transform: translateY(0); }
+
+        /* Бейдж локации */
+        .location-badge {
+            background: rgba(0, 0, 0, 0.6); border: 1px solid var(--accent);
+            color: #fff; padding: 0.8rem 1.5rem; border-radius: 50px;
+            font-family: var(--font-body); font-weight: 600; font-size: clamp(0.9rem, 2vw, 1.1rem);
+            display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 2rem;
+            backdrop-filter: blur(5px);
+        }
+        .location-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 10px var(--accent); }
+
+        /* Ценник */
+        .price-badge {
+            background: var(--accent); color: var(--text-on-yellow);
+            padding: 0.8rem 2rem; border-radius: 4px;
+            font-size: clamp(1.2rem, 3vw, 1.8rem); font-weight: 800; display: inline-block; margin-top: 2rem;
+            box-shadow: 0 10px 30px rgba(255, 193, 7, 0.3);
+            font-family: var(--font-head);
+        }
+
+        /* --- CARDS & UI --- */
+        .service-card {
+            background: rgba(255, 255, 255, 0.03); padding: 2.5rem; border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s;
+        }
+        /* Ховер: Желтая рамка */
+        .service-card:hover {
+            border-color: var(--accent);
+            background: rgba(255, 193, 7, 0.05);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 193, 7, 0.1);
+        }
+
+        .service-icon { font-size: 3rem; margin-bottom: 1.5rem; color: #fff; transition: 0.3s; }
+        .service-card:hover .service-icon { color: var(--accent); transform: scale(1.1); }
+
+        /* Статистика */
+        .stat-number { font-size: clamp(2.5rem, 5vw, 4rem); font-family: var(--font-head); font-weight: 900; color: var(--accent); }
+
+        /* Кнопки */
+        .cta-btn {
+            background: var(--accent); color: var(--text-on-yellow);
+            padding: 1.2rem 3rem; font-family: var(--font-head); font-weight: 700;
+            text-transform: uppercase; border-radius: 50px; transition: all 0.3s;
+            display: inline-block; text-decoration: none; border: none; font-size: 1rem;
+        }
+        .cta-btn:hover { background: #ffca2c; box-shadow: 0 0 30px rgba(255, 193, 7, 0.5); transform: scale(1.05); }
+
+        .header-btn {
+            border: 1px solid var(--accent); color: var(--accent);
+            padding: 0.5rem 1.5rem; border-radius: 50px; font-weight: 700; transition: 0.3s;
+        }
+        .header-btn:hover { background: var(--accent); color: #000; }
+
+        /* --- GALLERY --- */
+        .image-gallery {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 3rem;
+        }
+        .gallery-img {
+            width: 100%; height: 300px; object-fit: cover; border-radius: 12px;
+            transition: transform 0.3s, filter 0.3s; filter: grayscale(100%); /* ЧБ по умолчанию для стиля */
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .gallery-img:hover { transform: scale(1.03); filter: grayscale(0); border-color: var(--accent); }
+
+    </style>
+</head>
+<body>
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+
+    <header id="sticky-header" class="sticky-header">
+        <div class="font-head font-bold text-lg md:text-xl text-white tracking-wider">
+            МАНИПУЛЯТОР<span class="text-accent">724</span>.БЕЛ
+        </div>
+        <a href="tel:+375295026656" class="header-btn interactive">📞 +375-29-502-66-56</a>
+    </header>
+
+    <section id="hero">
+        <div class="wrapper text-center hero-content z-10">
+            <div class="location-badge interactive">
+                <div class="location-dot"></div>
+                Базируемся в Минске, работаем по всей стране
+            </div>
+
+            <h1 class="hero-title">МАНИПУЛЯТОР<br><span class="text-accent">724</span>.БЕЛ</h1>
+            <p class="subtitle mt-6 text-xl text-gray-300 tracking-widest">ЗАГРУЗКА • ПЕРЕВОЗКА • РАЗГРУЗКА</p>
+
+            <div class="price-badge interactive">ОТ 80 BYN/ЧАС</div>
+
+            <div class="mt-10">
+                <a href="tel:+375295026656" class="cta-btn interactive">📞 ВЫЗВАТЬ МАНИПУЛЯТОР</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-pad" style="background: var(--bg-darker);">
+        <div class="wrapper">
+            <h2 class="font-head text-4xl md:text-6xl mb-12 text-center text-white">ЦЕНЫ НА <span class="text-accent">УСЛУГИ</span></h2>
+
+            <div class="border border-yellow-500/30 bg-white/5 rounded-2xl p-8 max-w-4xl mx-auto backdrop-blur-sm">
+                <div class="flex flex-col md:flex-row justify-between items-center border-b border-white/10 pb-6 mb-6">
+                    <span class="text-xl text-gray-300">Почасовая аренда (мин. 3 часа)</span>
+                    <span class="text-4xl font-head font-bold text-accent mt-2 md:mt-0">80 BYN/час</span>
+                </div>
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <span class="text-xl text-gray-300">Смена (8 часов)</span>
+                    <span class="text-4xl font-head font-bold text-accent mt-2 md:mt-0">580 BYN</span>
+                </div>
+            </div>
+
+            <div class="text-center mt-6 text-gray-500 font-mono">
+                // Принимаем наличные и безнал
+            </div>
+        </div>
+    </section>
+
+    <section class="section-pad relative" style="background: var(--bg-dark);">
+    <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-yellow-500/50 to-transparent"></div>
+
+    <div class="wrapper">
+        <h2 class="font-head text-4xl md:text-6xl mb-16 text-center text-white">
+            ТЕХНИЧЕСКИЕ <span class="text-accent">ДАННЫЕ</span>
+        </h2>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 border-t border-b border-white/10 divide-y md:divide-y-0 md:divide-x divide-white/10">
+
+            <div class="group p-8 text-center transition-colors hover:bg-white/5 interactive">
+                <div class="text-accent font-head font-bold text-5xl mb-2 group-hover:scale-110 transition-transform duration-300">
+                    5<span class="text-2xl text-white/50 ml-1">т</span>
+                </div>
+                <h3 class="text-white font-bold text-lg">ГРУЗОПОДЪЕМНОСТЬ</h3>
+                <p class="text-xs text-gray-500 uppercase tracking-widest mt-1">Борта машины</p>
+            </div>
+
+            <div class="group p-8 text-center transition-colors hover:bg-white/5 interactive">
+                <div class="text-accent font-head font-bold text-5xl mb-2 group-hover:scale-110 transition-transform duration-300">
+                    2<span class="text-2xl text-white/50 ml-1">т</span>
+                </div>
+                <h3 class="text-white font-bold text-lg">МОЩНОСТЬ КРАНА</h3>
+                <p class="text-xs text-gray-500 uppercase tracking-widest mt-1">Г/П Стрелы</p>
+            </div>
+
+            <div class="group p-8 text-center transition-colors hover:bg-white/5 interactive">
+                <div class="text-accent font-head font-bold text-5xl mb-2 group-hover:scale-110 transition-transform duration-300">
+                    5<span class="text-2xl text-white/50 ml-1">м</span>
+                </div>
+                <h3 class="text-white font-bold text-lg">ДЛИНА КУЗОВА</h3>
+                <p class="text-xs text-gray-500 uppercase tracking-widest mt-1">Перевозка грузов</p>
+            </div>
+
+            <div class="group p-8 text-center transition-colors hover:bg-white/5 interactive">
+                <div class="text-accent font-head font-bold text-5xl mb-2 group-hover:scale-110 transition-transform duration-300">
+                    7<span class="text-2xl text-white/50 ml-1">м</span>
+                </div>
+                <h3 class="text-white font-bold text-lg">ВЫЛЕТ СТРЕЛЫ</h3>
+                <p class="text-xs text-gray-500 uppercase tracking-widest mt-1">Подача на высоту</p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+
+    <section class="section-pad" style="background: var(--bg-darker); overflow: hidden;">
+        <div class="wrapper">
+            <h2 class="font-head text-4xl md:text-6xl mb-12 text-center text-white">ГАБАРИТЫ <span class="text-accent">ТЕХНИКИ</span></h2>
+
+            <div class="schematic-container relative w-full max-w-5xl mx-auto">
+
+                <img src="5.jpg" alt="Схема манипулятора" class="w-full h-auto rounded-xl shadow-2xl opacity-80" style="border: 1px solid rgba(255,255,255,0.1);">
+
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent rounded-xl"></div>
+
+                <div class="dimension-box" style="bottom: 25%; left: 36%; width: 48%;">
+                    <div class="dim-line"></div>
+                    <div class="dim-dot left"></div>
+                    <div class="dim-dot right"></div>
+                    <div class="dim-label text-center">
+                        <span class="text-accent font-head font-bold text-xl md:text-3xl">5 МЕТРОВ</span>
+                        <p class="text-xs md:text-sm text-gray-300 uppercase tracking-widest">Длина кузова</p>
+                    </div>
+                </div>
+
+                <div class="dimension-box" style="top: 25%; left: 38%; width: 55%;">
+                    <div class="dim-line top-line"></div>
+                    <div class="dim-dot left top-dot"></div>
+                    <div class="dim-dot right top-dot"></div>
+                    <div class="dim-label text-center" style="transform: translateY(-150%);">
+                        <span class="text-accent font-head font-bold text-xl md:text-3xl">7 МЕТРОВ</span>
+                        <p class="text-xs md:text-sm text-gray-300 uppercase tracking-widest">Вылет стрелы</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12 max-w-4xl mx-auto">
+                <div class="bg-white/5 p-6 rounded-lg border-l-4 border-yellow-500">
+                    <h4 class="font-head text-xl text-white mb-2">🚚 ВМЕСТИТЕЛЬНЫЙ КУЗОВ</h4>
+                    <p class="text-gray-400">Размер 5.0м × 2.45м позволяет перевозить до 8 стандартных поддонов, бытовки и длинномерные грузы (до 6м с открытым бортом).</p>
+                </div>
+                <div class="bg-white/5 p-6 rounded-lg border-l-4 border-yellow-500">
+                    <h4 class="font-head text-xl text-white mb-2">🏗 МОЩНАЯ СТРЕЛА</h4>
+                    <p class="text-gray-400">Вылет 7 метров позволяет подавать грузы на второй этаж, через забор или вглубь участка. Грузоподъемность под собой — 2т.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <style>
+        .schematic-container {
+            user-select: none;
+        }
+
+        .dimension-box {
+            position: absolute;
+            height: 2px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Скрываем для анимации */
+            opacity: 0;
+        }
+
+        .dim-line {
+            width: 100%;
+            height: 2px;
+            background: var(--accent);
+            position: relative;
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        /* Пунктир для стрелы */
+        .top-line {
+            background: transparent;
+            border-top: 2px dashed var(--accent);
+            height: 0;
+        }
+
+        .dim-dot {
+            width: 10px; height: 10px;
+            background: var(--accent);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            transform: translate(0, -50%);
+            box-shadow: 0 0 15px var(--accent);
+        }
+        .dim-dot.left { left: 0; }
+        .dim-dot.right { right: 0; }
+        .top-dot { top: -1px; }
+
+        .dim-label {
+            position: absolute;
+            top: 15px;
+            white-space: nowrap;
+            background: rgba(0,0,0,0.8);
+            padding: 5px 15px;
+            border-radius: 4px;
+            border: 1px solid var(--accent-dim);
+            backdrop-filter: blur(4px);
+        }
+    </style>
+
+    <script>
+        // Анимация схемы
+        gsap.utils.toArray('.dimension-box').forEach((box, i) => {
+            let line = box.querySelector('.dim-line');
+            let label = box.querySelector('.dim-label');
+
+            let tl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: '.schematic-container',
+                    start: 'top 70%',
+                }
+            });
+
+            // 1. Появляется контейнер линии
+            tl.to(box, { opacity: 1, duration: 0.1, delay: i * 0.5 })
+            // 2. Линия растягивается от центра (или слева направо)
+              .from(line, { width: 0, duration: 0.8, ease: "power2.out" })
+            // 3. Появляется текст
+              .from(label, { y: 10, opacity: 0, duration: 0.4 }, "-=0.2");
+        });
+    </script>
+    <section class="section-pad" style="background: var(--bg-darker);">
+        <div class="wrapper">
+            <h2 class="font-head text-4xl md:text-6xl mb-12 text-white">ЧТО <span class="text-accent">ПЕРЕВОЗИМ</span></h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="service-card interactive">
+                    <div class="service-icon">🏠</div>
+                    <h3 class="font-head text-xl mb-3 text-white">БЫТОВКИ</h3>
+                    <p class="text-gray-400 text-sm">Транспортировка и установка бытовок, контейнеров.</p>
+                </div>
+                <div class="service-card interactive">
+                    <div class="service-icon">⭕</div>
+                    <h3 class="font-head text-xl mb-3 text-white">КОЛЬЦА</h3>
+                    <p class="text-gray-400 text-sm">Доставка и монтаж бетонных колец для колодцев.</p>
+                </div>
+                <div class="service-card interactive">
+                    <div class="service-icon">📦</div>
+                    <h3 class="font-head text-xl mb-3 text-white">ПОДДОНЫ</h3>
+                    <p class="text-gray-400 text-sm">Перевозка плитки, кирпича, блоков.</p>
+                </div>
+                <div class="service-card interactive">
+                    <div class="service-icon">🪵</div>
+                    <h3 class="font-head text-xl mb-3 text-white">ПИЛОМАТЕРИАЛЫ</h3>
+                    <p class="text-gray-400 text-sm">Транспортировка досок, бруса, фанеры.</p>
+                </div>
+                <div class="service-card interactive">
+                    <div class="service-icon">🏗️</div>
+                    <h3 class="font-head text-xl mb-3 text-white">СТРОЙМАТЕРИАЛЫ</h3>
+                    <p class="text-gray-400 text-sm">Металлопрокат, арматура, панели.</p>
+                </div>
+                <div class="service-card interactive">
+                    <div class="service-icon">⚙️</div>
+                    <h3 class="font-head text-xl mb-3 text-white">НЕГАБАРИТ</h3>
+                    <p class="text-gray-400 text-sm">Перевозка сложных и тяжелых грузов.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="section-pad relative overflow-hidden" style="background: var(--bg-darker);">
+        <div class="absolute inset-0 opacity-10" style="background-image: linear-gradient(#FFC107 1px, transparent 1px), linear-gradient(90deg, #FFC107 1px, transparent 1px); background-size: 50px 50px;"></div>
+
+        <div class="wrapper text-center relative z-10">
+            <h2 class="font-head text-4xl md:text-6xl mb-6 text-white">НУЖЕН МАНИПУЛЯТОР?</h2>
+
+            <div class="flex flex-wrap justify-center gap-4 mt-8">
+                <a href="tel:+375295026656" class="cta-btn interactive">📞 +375-29-502-66-56</a>
+                <a href="tel:+375447973965" class="cta-btn interactive" style="background: transparent; border: 2px solid var(--accent); color: var(--accent);">+375-44-797-39-65</a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="border-t border-yellow-500/20 bg-black pt-16 pb-8">
+        <div class="wrapper">
+            <div class="grid md:grid-cols-3 gap-10 mb-10">
+                <div>
+                    <h3 class="font-head text-xl text-accent mb-4">МАНИПУЛЯТОР724.БЕЛ</h3>
+                    <p class="text-gray-500">Оперативная подача техники в любую точку Минска и Беларуси.</p>
+                </div>
+                <div>
+                    <h3 class="font-head text-xl text-accent mb-4">КОНТАКТЫ</h3>
+                    <p class="text-gray-400 mb-2">📞 +375-29-502-66-56</p>
+                    <p class="text-gray-400">📞 +375-44-797-39-65</p>
+                </div>
+                <div>
+                    <h3 class="font-head text-xl text-accent mb-4">ИНФО</h3>
+                    <p class="text-gray-400">УНП: XXXXXXXXX</p>
+                    <p class="text-gray-400">Минск, Беларусь</p>
+                </div>
+            </div>
+            <div class="text-center pt-8 border-t border-white/10 text-gray-600 text-sm">
+                &copy; 2026 Манипулятор724.бел. Все права защищены.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- LENIS SMOOTH SCROLL ---
+        const lenis = new Lenis({ duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+        function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+        requestAnimationFrame(raf);
+
+        // --- CUSTOM CURSOR ---
+        const cursorDot = document.querySelector('.cursor-dot');
+        const cursorOutline = document.querySelector('.cursor-outline');
+        let cursorX = 0, cursorY = 0;
+
+        window.addEventListener('mousemove', (e) => {
+            cursorX = e.clientX; cursorY = e.clientY;
+            cursorDot.style.transform = `translate3d(${cursorX}px, ${cursorY}px, 0) translate(-50%, -50%)`;
+            gsap.to(cursorOutline, { x: cursorX, y: cursorY, duration: 0.15, ease: "power2.out", xPercent: -50, yPercent: -50, overwrite: 'auto' });
+        });
+
+        document.querySelectorAll('.interactive').forEach(el => {
+            el.addEventListener('mouseenter', () => document.body.classList.add('hovered'));
+            el.addEventListener('mouseleave', () => document.body.classList.remove('hovered'));
+        });
+
+        // --- STICKY HEADER ---
+        const header = document.getElementById('sticky-header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 400) header.classList.add('visible');
+            else header.classList.remove('visible');
+        });
+
+        // --- ANIMATIONS ---
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Карточки
+        gsap.utils.toArray('.service-card').forEach((card, i) => {
+            gsap.from(card, {
+                scrollTrigger: { trigger: card, start: 'top 90%' },
+                opacity: 0, y: 30, duration: 0.5, delay: i * 0.05
+            });
+        });
+
+        // Галерея (Стильное появление)
+        gsap.from('.gallery-img', {
+            scrollTrigger: { trigger: '.image-gallery', start: 'top 80%' },
+            opacity: 0, scale: 0.9, duration: 0.8, stagger: 0.1, ease: "back.out(1.7)"
+        });
+    </script>
+</body>
+</html>
