@@ -792,5 +792,72 @@
             },
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Проверяем, что это не мобильное устройство (ширина > 1024px)
+            if (window.matchMedia('(min-width: 1024px)').matches) {
+
+                const telLinks = document.querySelectorAll('a[href^="tel:"]');
+
+                telLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault(); // Запрещаем стандартное действие (вызов звонилки)
+
+                        // Получаем чистый номер телефона
+                        const phoneNumber = link.getAttribute('href').replace('tel:', '');
+
+                        // Копируем в буфер обмена
+                        navigator.clipboard.writeText(phoneNumber).then(() => {
+                            showNotification('Номер скопирован: ' + phoneNumber);
+                        }).catch(err => {
+                            console.error('Ошибка копирования: ', err);
+                        });
+                    });
+                });
+            }
+
+            // Функция для создания красивого уведомления
+            function showNotification(message) {
+                // Удаляем старое уведомление, если есть
+                const oldNote = document.getElementById('copy-notification');
+                if (oldNote) oldNote.remove();
+
+                // Создаем элементы
+                const notification = document.createElement('div');
+                notification.id = 'copy-notification';
+                notification.innerText = message;
+
+                // Стилизуем прямо здесь (используем твои переменные цветов)
+                Object.assign(notification.style, {
+                    position: 'fixed',
+                    bottom: '20px',
+                    right: '20px',
+                    backgroundColor: '#FFC107', // Твой акцентный желтый
+                    color: '#000',
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontWeight: 'bold',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                    zIndex: '99999',
+                    transform: 'translateY(100px)',
+                    transition: 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+                });
+
+                document.body.appendChild(notification);
+
+                // Анимация появления
+                setTimeout(() => {
+                    notification.style.transform = 'translateY(0)';
+                }, 10);
+
+                // Анимация исчезновения через 3 секунды
+                setTimeout(() => {
+                    notification.style.transform = 'translateY(100px)';
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
+        });
+    </script>
 </body>
 </html>
